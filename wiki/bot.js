@@ -36,11 +36,17 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 });
                 break;
             case 'wiki':
-                var url ='https://wotmud.fandom.com/api.php?action=opensearch&limit=5&search='+args[0] ;
-                //console.log(url);
+                var url='https://wotmud.fandom.com/api/v1/Search/List?query='+args.join('%20')+'&rank=most-viewed&limit=5';
+                console.log(url);
                 request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
-                    var links = body[1].map(result => 'https://wotmud.fandom.com/wiki/'+encodeURIComponent(result));
-                    console.log(links);
+                    // console.log("Body:");
+                    // console.log(body.items);
+                    var links = [];
+                    body.items.forEach(item => {
+                        links.push(item.url);
+                    });
+                    // console.log("Links:");
+                    // console.log(links);
                     
                     if (err) { return console.log(err); }
                     if (links.length > 0) {
