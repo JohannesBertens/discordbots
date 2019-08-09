@@ -1,0 +1,12 @@
+{
+    "name": "wiki-bot",
+    "version": "1.0.0",
+    "description": "Wotmud Wiki Bot",
+    "main": "bot.js",
+    "author": "Mantas",
+    "dependencies": {
+        "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+        "request": "^2.88.0",
+        "winston": "^3.2.1"
+    }
+}
