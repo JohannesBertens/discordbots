@@ -36,7 +36,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 });
                 break;
             case 'wiki':
-                var url='https://wotmud.fandom.com/api/v1/Search/List?query='+args.join('%20')+'&limit=5';
+                var url='https://wotmud.fandom.com/api/v1/Search/List?query='+args.join('%20')+'&limit=1';
                 console.log(url);
                 request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
                     // console.log("Body:");
