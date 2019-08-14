@@ -64,6 +64,25 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     message: "https://docs.google.com/spreadsheets/d/1F7WvYpa45zZpJhqLeh747CgDtk0LJZg-LRJDXwRf-TU/edit#gid=0"
                 })
                 break;
+            case 'stats':
+                var url='https://sheetdb.io/api/v1/wddrrdrvt3bll/search?Name=*'+args.join('%20')+'*';
+                console.log(url);
+                request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
+                    //console.log(body);
+                    if (err) { return console.log(err); }
+
+                    var resultString = "```";
+                    body.forEach(result => {
+                        resultString += result.Name.padStart(45," ") + " " + ("(" + result.Type + ")").padEnd(15," ") +" OB: " + result.OB.padStart(3,' ') + ", PB: " + result.PB.padStart(2,' ') + ", Weight: " + result.Weight.padStart(4," ") + ", DMG: " + result['Damage Roll'] + "\n"
+                    });
+                    resultString += "```";
+                    bot.sendMessage({
+                        to: channelID,
+                        message: resultString
+                    })
+
+                });              
+                break;
             // Just add any case commands if you want to..
          }
      }
