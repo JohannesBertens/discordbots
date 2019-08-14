@@ -39,14 +39,10 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 var url='https://wotmud.fandom.com/api/v1/Search/List?query='+args.join('%20')+'&limit=1';
                 console.log(url);
                 request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
-                    // console.log("Body:");
-                    // console.log(body.items);
                     var links = [];
                     body.items.forEach(item => {
                         links.push(item.url);
                     });
-                    // console.log("Links:");
-                    // console.log(links);
                     
                     if (err) { return console.log(err); }
                     if (links.length > 0) {
@@ -61,7 +57,13 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                         })
                     }
                 });               
-            break;
+                break;
+            case 'eq':
+                bot.sendMessage({
+                    to: channelID,
+                    message: "https://docs.google.com/spreadsheets/d/1F7WvYpa45zZpJhqLeh747CgDtk0LJZg-LRJDXwRf-TU/edit#gid=0"
+                })
+                break;
             // Just add any case commands if you want to..
          }
      }
