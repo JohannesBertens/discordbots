@@ -35,6 +35,18 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     message: 'Pong!'
                 });
                 break;
+            case 'prac':
+                bot.sendMessage({
+                    to: channelID,
+                    message: 'http://ickmund.github.io/practrainer/'
+                });
+                break;
+            case 'eq':
+                bot.sendMessage({
+                    to: channelID,
+                    message: 'https://docs.google.com/spreadsheets/d/1F7WvYpa45zZpJhqLeh747CgDtk0LJZg-LRJDXwRf-TU/edit#gid=0'
+                });
+                break;
             case 'wiki':
                 var url='https://wotmud.fandom.com/api/v1/Search/List?query='+args.join('%20')+'&limit=1';
                 console.log(url);
