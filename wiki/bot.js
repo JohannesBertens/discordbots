@@ -40,21 +40,28 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 console.log(url);
                 request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
                     var links = [];
-                    body.items.forEach(item => {
-                        links.push(item.url);
-                    });
-                    
-                    if (err) { return console.log(err); }
-                    if (links.length > 0) {
-                        bot.sendMessage({
-                            to: channelID,
-                            message: links.join("\n")
-                        })
-                    } else {
+                    if (body == undefined || body.items == undefined) {
                         bot.sendMessage({
                             to: channelID,
                             message: 'No results for ' + args[0]
                         })
+                    } else {
+                        body.items.forEach(item => {
+                            links.push(item.url);
+                        });
+                        
+                        if (err) { return console.log(err); }
+                        if (links.length > 0) {
+                            bot.sendMessage({
+                                to: channelID,
+                                message: links.join("\n")
+                            })
+                        } else {
+                            bot.sendMessage({
+                                to: channelID,
+                                message: 'No results for ' + args[0]
+                            })
+                        }
                     }
                 });               
                 break;
