@@ -77,23 +77,36 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     }
                 });               
                 break;
-            case 'eq':
-                bot.sendMessage({
-                    to: channelID,
-                    message: "https://docs.google.com/spreadsheets/d/1F7WvYpa45zZpJhqLeh747CgDtk0LJZg-LRJDXwRf-TU/edit#gid=0"
-                })
-                break;
             case 'stats':
                 var url='https://sheetdb.io/api/v1/wddrrdrvt3bll/search?Name=*'+args.join('%20')+'*';
                 console.log(url);
                 request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
                     //console.log(body);
                     if (err) { return console.log(err); }
+                    if (body.length == 0)
+                    {
+                        bot.sendMessage({
+                            to: channelID,
+                            message: 'No results for ' + args.join(' ')
+                        });
+                        return;
+                    }
+
+                    var maxNameLength = 0;
+                    var maxTypeLength = 0;
+                    body.forEach(result => {
+                        maxNameLength = Math.max(result.Name.length, maxNameLength);
+                        maxTypeLength = Math.max(result.Type.length, maxTypeLength);
+                    });
 
                     var resultString = "```";
                     body.forEach(result => {
-                        resultString += result.Name.padStart(45," ") + " " + ("(" + result.Type + ")").padEnd(15," ") +" OB: " + result.OB.padStart(3,' ') + ", PB: " + result.PB.padStart(2,' ') + ", Weight: " + result.Weight.padStart(4," ") + ", DMG: " + result['Damage Roll'] + "\n"
+                        resultString += result.Name.padStart(maxNameLength," ") + " " 
+                        + ("(" + result.Type + ")").padEnd(maxTypeLength+3," ")  
+                        + result.OB.padStart(3,' ') + "/" + result.PB.padStart(2,' ') + ", " 
+                        + result.Weight.padStart(4," ") + "lbs, DMG: " + result['Damage Roll'] + "\n"
                     });
+
                     resultString += "```";
                     bot.sendMessage({
                         to: channelID,
