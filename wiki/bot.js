@@ -103,8 +103,8 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     body.forEach(result => {
                         resultString += result.Name.padStart(maxNameLength," ") + " " 
                         + ("(" + result.Type + ")").padEnd(maxTypeLength+3," ")  
-                        + result.OB.padStart(3,' ') + "/" + result.PB.padStart(2,' ') + ", " 
-                        + result.Weight.padStart(4," ") + "lbs, DMG: " + result['Damage Roll'] + "\n"
+                        + result.OB.padStart(3,' ') + "ob, " + result.PB.padStart(2,' ') + "pb, " 
+                        + result.Weight.padStart(4," ") + "lbs, " + result['Damage Roll'] + " dmg\n"
                     });
 
                     resultString += "```";
