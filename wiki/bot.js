@@ -19,6 +19,34 @@ bot.on('ready', function (evt) {
     logger.info('Logged in as: ');
     logger.info(bot.username + ' - (' + bot.id + ')');
 });
+
+function printResults (body, bot, channelID) {
+    var maxNameLength = 0;
+    var maxTypeLength = 0;
+    body.forEach(result => {
+        maxNameLength = Math.max(result.Name.length, maxNameLength);
+        maxTypeLength = Math.max(result.Type.length, maxTypeLength);
+    });
+
+    var resultString = "```";
+    resultString += "".padStart(maxNameLength + 2," ")
+        + "CLASS".padStart(maxTypeLength/2 + 2, " ").padEnd(maxTypeLength + 2, " ")
+        + " OB PB  lbs DMG\n"
+    body.forEach(result => {
+        resultString += result.Name.padStart(maxNameLength," ") + " " 
+        + ("(" + result.Type + ")").padEnd(maxTypeLength+3," ")  
+        + result.OB.padStart(3,' ') + " " + result.PB.padStart(2,' ') + " " 
+        + result.Weight.padStart(4," ") + " " + result['Damage Roll'] + "\n"
+    });
+
+    resultString += "```";
+    bot.sendMessage({
+        to: channelID,
+        message: resultString
+    })
+}
+
+
 bot.on('message', function (user, userID, channelID, message, evt) {
     // Our bot needs to know if it will execute a command
     // It will listen for messages that will start with `!`
@@ -93,27 +121,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                             return;
                         }
 
-                        var maxNameLength = 0;
-                        var maxTypeLength = 0;
-                        body.forEach(result => {
-                            maxNameLength = Math.max(result.Name.length, maxNameLength);
-                            maxTypeLength = Math.max(result.Type.length, maxTypeLength);
-                        });
-
-                        var resultString = "```";
-                        body.forEach(result => {
-                            resultString += result.Name.padStart(maxNameLength," ") + " " 
-                            + ("(" + result.Type + ")").padEnd(maxTypeLength+3," ")  
-                            + result.OB.padStart(3,' ') + "ob, " + result.PB.padStart(2,' ') + "pb, " 
-                            + result.Weight.padStart(4," ") + "lbs, " + result['Damage Roll'] + " dmg\n"
-                        });
-
-                        resultString += "```";
-                        bot.sendMessage({
-                            to: channelID,
-                            message: resultString
-                        })
-
+                        printResults(body, bot, channelID);                        
                     });   
                 } else {
                     var url='https://sheetdb.io/api/v1/wddrrdrvt3bll/search?Name=*'+args.join('%20')+'*';
@@ -130,27 +138,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                             return;
                         }
 
-                        var maxNameLength = 0;
-                        var maxTypeLength = 0;
-                        body.forEach(result => {
-                            maxNameLength = Math.max(result.Name.length, maxNameLength);
-                            maxTypeLength = Math.max(result.Type.length, maxTypeLength);
-                        });
-
-                        var resultString = "```";
-                        body.forEach(result => {
-                            resultString += result.Name.padStart(maxNameLength," ") + " " 
-                            + ("(" + result.Type + ")").padEnd(maxTypeLength+3," ")  
-                            + result.OB.padStart(3,' ') + "ob, " + result.PB.padStart(2,' ') + "pb, " 
-                            + result.Weight.padStart(4," ") + "lbs, " + result['Damage Roll'] + " dmg\n"
-                        });
-
-                        resultString += "```";
-                        bot.sendMessage({
-                            to: channelID,
-                            message: resultString
-                        })
-
+                        printResults(body, bot, channelID);
                     });              
                 }
                 break;
