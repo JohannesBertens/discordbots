@@ -105,6 +105,28 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     }
                 });               
                 break;
+            case 'angreal':
+                var angrealMessage="```" + `
+    --- female angreal ---     lbs uses SPpu SPtotal
+a disc of moonstone            0.2   10   8     80
+a greenish, translucent sphere 1.0   10  10    100
+a necklace of fire sapphire    0.1    8   5     40
+a sculpted statuette           1.0   20   9    180
+a small crystalline circlet    0.2  150   3    450
+a wood carving of a bear       3.0    6   5     30
+an ivory figurine              1.0    8   4     32
+                
+     --- male angreal ---      lbs uses SPpu SPtotal
+a jade carving of an old man   0.5  50    9    450 
+a many-faceted stone	       4.0 142    3    426
+a small stone dagger	       ???  30    5    150
+a small crystalline globe      0.5  10   10    100
+a short, thick rod             2.5  ??   ??    ???` + "```";
+                bot.sendMessage({
+                    to: channelID,
+                    message: angrealMessage
+                });
+                break;
             case 'stats':
                 if (args[0] == 'class') {
                     var url='https://sheetdb.io/api/v1/wddrrdrvt3bll/search?Type=*'+args[1]+'*';
