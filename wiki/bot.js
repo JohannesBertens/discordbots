@@ -121,7 +121,8 @@ a jade carving of an old man   0.5  50    9    450
 a many-faceted stone	       4.0 142    3    426
 a small stone dagger	       ???  30    5    150
 a small crystalline globe      0.5  10   10    100
-a short, thick rod             2.5  ??   ??    ???` + "```";
+a short, thick rod             2.5  10    6     60
+a carved ivory pyramid         ???  15   12    180` + "```";
                 bot.sendMessage({
                     to: channelID,
                     message: angrealMessage
