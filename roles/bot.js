@@ -73,6 +73,25 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                         }
                     }
                 });
+                break;
+            case 'mafia':
+                logger.info(message);
+                let mafiaRole = Object.entries(bot.servers[currentServer].roles).find(r => r[1].name == "mafia");
+                bot.getMember({"serverID":currentServer,"userID":userID}, function(err, res) {
+                    if (err) {
+                        console.error(err);
+                    } else {
+                        if (res.roles.includes(mafiaRole[0])) {
+                            bot.removeFromRole({"serverID":currentServer,"userID":userID,"roleID":mafiaRole[0]},function(err,response) {
+                                if (err) console.error(err); /* Failed to remove role */
+                            });
+                        } else {
+                            bot.addToRole({"serverID":currentServer,"userID":userID,"roleID":mafiaRole[0]},function(err,response) {
+                                if (err) console.error(err); /* Failed to apply role */
+                            });        
+                        }
+                    }
+                });
 
                 break;
             break;
