@@ -130,7 +130,7 @@ a carved ivory pyramid         ???  15   12    180` + "```";
                 break;
             case 'stats':
                 if (args[0] == 'class') {
-                    var url='https://sheetdb.io/api/v1/wddrrdrvt3bll/search?Type=*'+args[1]+'*';
+                    var url='https://equipmentstats.azurewebsites.net/api/GetStats?type='+args[1];
                     console.log(url);
                     request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
                         //console.log(body);
@@ -147,7 +147,7 @@ a carved ivory pyramid         ???  15   12    180` + "```";
                         printResults(body, bot, channelID);                        
                     });   
                 } else {
-                    var url='https://sheetdb.io/api/v1/wddrrdrvt3bll/search?Name=*'+args.join('%20')+'*';
+                    var url='https://equipmentstats.azurewebsites.net/api/GetStats?name='+args.join('%20');
                     console.log(url);
                     request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
                         //console.log(body);
