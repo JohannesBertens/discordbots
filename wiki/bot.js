@@ -5,11 +5,10 @@ const request = require('request');
 
 const statsHelpMessage="```" + `
 Usage:
-.stats help:               Display this message
-.stats <keywords>:         Display info on the WEAPONS with the keywords in the name
-.stats class <keyword>:    Display info on the CLASS of WEAPONS with the keyword in the name of the CLASS
-.stats eq <keywords>:      Display info on the EQUIPMENT with the keywords in the name
-.stats eq class <keyword>: Dsiplay info on the CLASS of EQUIPMENT with the keyword in the name of the CLASS
+.stats <keywords>:         WEAPONS with the <keywords> in the name
+.stats class <keyword>:    WEAPONS with the <keyword> in the name of the CLASS
+.stats eq <keywords>:      EQUIPMENT and TRINKS with the <keywords> in the name
+.stats eq class <keyword>: EQUIPMENT and TRINKS with the <keyword> in the name of the CLASS
 ` + "```";
 const angrealMessage="```" + `
 --- female angreal ---     lbs uses SPpu SPtotal
