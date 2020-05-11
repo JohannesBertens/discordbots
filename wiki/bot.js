@@ -5,10 +5,11 @@ const request = require('request');
 
 const statsHelpMessage="```" + `
 Usage:
-.stats help:            Display this message
-.stats <keywords>:      Display info on the WEAPONS with the keywords in the name
-.stats class <keyword>: Display info the CLASS of WEAPONS with the keyword in the name of the CLASS
-.stats eq <keywords>:   Display info on the EQUIPMENT with the keywords in the name
+.stats help:               Display this message
+.stats <keywords>:         Display info on the WEAPONS with the keywords in the name
+.stats class <keyword>:    Display info on the CLASS of WEAPONS with the keyword in the name of the CLASS
+.stats eq <keywords>:      Display info on the EQUIPMENT with the keywords in the name
+.stats eq class <keyword>: Dsiplay info on the CLASS of EQUIPMENT with the keyword in the name of the CLASS
 ` + "```";
 const angrealMessage="```" + `
 --- female angreal ---     lbs uses SPpu SPtotal
@@ -151,29 +152,54 @@ function getStatsInfo(args, callback) {
     } else if (args[0] == 'eq') {
         args = args.splice(1);
         
-        var url='https://equipmentstats.azurewebsites.net/api/GetEqStats?name='+args.join('%20');
-        console.log(url);
-        request(url, {rejectUnauthorized: false, json: true }, (err, res, eqbody) => {
-            if (err) { return console.log(err); }
+        if (args[0] == 'class') {
+            args = args.splice(1);
 
-            var trinkurl='https://equipmentstats.azurewebsites.net/api/GetTrinkStats?name='+args.join('%20');
-            console.log(trinkurl);
-            request(trinkurl, {rejectUnauthorized: false, json: true }, (err, res, trinkbody) => {
-                if (err) { return console.log(err); }
-                if (trinkbody.length == 0 && eqbody.length == 0)
-                {
-                    callback('No results for ' + args.join(' '));
-                    return;
-                }
+            var url='https://equipmentstats.azurewebsites.net/api/GetEqStats?type='+args.join('%20');
+            console.log(url);
+            request(url, {rejectUnauthorized: false, json: true }, (err, res, eqbody) => {
+                if (err) { console.log(err); return; }
 
-                callback(printEqResults(eqbody) + printTrinkResults(trinkbody));
+                var trinkurl='https://equipmentstats.azurewebsites.net/api/GetTrinkStats?type='+args.join('%20');
+                console.log(trinkurl);
+                request(trinkurl, {rejectUnauthorized: false, json: true }, (err, res, trinkbody) => {
+                    if (err) { console.log(err); return; }
+                    if (trinkbody.length == 0 && eqbody.length == 0)
+                    {
+                        callback('No results for ' + args.join(' '));
+                        return;
+                    }
+
+                    var msg = printEqResults(eqbody) + printTrinkResults(trinkbody);
+                    //console.log(msg);
+                    callback(msg);
+                });
             });
-        });
+        } else {
+            var url='https://equipmentstats.azurewebsites.net/api/GetEqStats?name='+args.join('%20');
+            console.log(url);
+            request(url, {rejectUnauthorized: false, json: true }, (err, res, eqbody) => {
+                if (err) { console.log(err); return; }
+
+                var trinkurl='https://equipmentstats.azurewebsites.net/api/GetTrinkStats?name='+args.join('%20');
+                console.log(trinkurl);
+                request(trinkurl, {rejectUnauthorized: false, json: true }, (err, res, trinkbody) => {
+                    if (err) { console.log(err); return; }
+                    if (trinkbody.length == 0 && eqbody.length == 0)
+                    {
+                        callback('No results for ' + args.join(' '));
+                        return;
+                    }
+
+                    callback(printEqResults(eqbody) + printTrinkResults(trinkbody));
+                });
+            });
+        }
     } else if (args[0] == 'class') {
         var url='https://equipmentstats.azurewebsites.net/api/GetStats?type='+args[1];
         console.log(url);
         request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
-            if (err) { return console.log(err); }
+            if (err) { console.log(err); return; }
             if (body.length == 0)
             {
                 callback('No results for ' + args.join(' '));
@@ -187,7 +213,7 @@ function getStatsInfo(args, callback) {
         console.log(url);
         request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
             //console.log(body);
-            if (err) { return console.log(err); }
+            if (err) { console.log(err); return; }
             if (body.length == 0)
             {
                 callback('No results for ' + args.join(' '));
