@@ -90,7 +90,7 @@ function printEqResults (body) {
         + ("(" + result.Type + ")").padEnd(maxTypeLength+3," ")  
         + result.DB.padStart(3,' ') + " " + result.PB.padStart(2,' ') + " " 
         + result.Total.padStart(4,' ') + " " + result.MV.padStart(3,' ') + " " 
-        + result.Weight.padStart(4," ") + " " + result['True Abs %'].padStart(4," ") + " " + result['Est Abs %'].padStart(5," ") + "\n"
+        + result.Weight.padStart(4," ") + " " + result['True Abs %'].padStart(4," ") + " " + result['Est Abs %'].padStart(5," ") + "\n";
     });
 
     resultString += "```";
@@ -116,7 +116,7 @@ function printTrinkResults (body) {
         + ("(" + result.Type + ")").padEnd(maxTypeLength+3," ")  
         + result.DB.padStart(3,' ') + " " + result.PB.padStart(2,' ') + " " 
         + result.Total.padStart(4,' ') + " " + result.MV.padStart(3,' ') + " " 
-        + result.Weight.padStart(4," ") + "\n"
+        + result.Weight.padStart(4," ") + "\n";
     });
 
     resultString += "```";
@@ -146,6 +146,24 @@ function getWikiInfo(searchString, callback) {
     });             
 }
 
+function postMessage(message, callback) {
+    if (message.length > 2000) // DRAMA!
+    {
+        var lines = message.split("\n");
+
+        var msg1 = (lines.slice(0, lines.length/2)).join("\n") + "```";
+        callback(msg1);
+
+        var msg2 = "```" + (lines.slice(lines.length/2)).join("\n");
+        setTimeout(function (){
+            callback(msg2);
+          }, 1000); 
+        
+    } else {
+        callback(message);
+    }
+}
+
 function getStatsInfo(args, callback) {
     if (args[0] == 'help') {
         callback(statsHelpMessage);
@@ -170,9 +188,7 @@ function getStatsInfo(args, callback) {
                         return;
                     }
 
-                    var msg = printEqResults(eqbody) + printTrinkResults(trinkbody);
-                    //console.log(msg);
-                    callback(msg);
+                    postMessage(printEqResults(eqbody) + printTrinkResults(trinkbody), callback);
                 });
             });
         } else {
@@ -191,7 +207,7 @@ function getStatsInfo(args, callback) {
                         return;
                     }
 
-                    callback(printEqResults(eqbody) + printTrinkResults(trinkbody));
+                    postMessage(printEqResults(eqbody) + printTrinkResults(trinkbody), callback);
                 });
             });
         }
