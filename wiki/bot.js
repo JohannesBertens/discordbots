@@ -71,6 +71,8 @@ function printResults (body) {
 }
 
 function printEqResults (body) {
+    if (body == undefined || body.length == 0) return "";
+    
     var maxNameLength = 0;
     var maxTypeLength = 0;
     body.forEach(result => {
@@ -79,7 +81,7 @@ function printEqResults (body) {
     });
 
     var resultString = "```";
-    resultString += "".padStart(maxNameLength + 2," ")
+    resultString += " EQUIPMENT -- ".padStart(maxNameLength + 2,"-")
         + "CLASS".padStart(maxTypeLength/2 + 2, " ").padEnd(maxTypeLength + 2, " ")
         + " DB PB Total MVs lbs TAbs% EAbs%\n"
     body.forEach(result => {
@@ -88,6 +90,32 @@ function printEqResults (body) {
         + result.DB.padStart(3,' ') + " " + result.PB.padStart(2,' ') + " " 
         + result.Total.padStart(4,' ') + " " + result.MV.padStart(3,' ') + " " 
         + result.Weight.padStart(4," ") + " " + result['True Abs %'].padStart(4," ") + " " + result['Est Abs %'].padStart(5," ") + "\n"
+    });
+
+    resultString += "```";
+    return resultString;
+}
+
+function printTrinkResults (body) {
+    if (body == undefined || body.length == 0) return "";
+
+    var maxNameLength = 0;
+    var maxTypeLength = 0;
+    body.forEach(result => {
+        maxNameLength = Math.max(result.Name.length, maxNameLength);
+        maxTypeLength = Math.max(result.Type.length, maxTypeLength);
+    });
+
+    var resultString = "```";
+    resultString += " TRINKS -- ".padStart(maxNameLength + 2,"-")
+        + "CLASS".padStart(maxTypeLength/2 + 2, " ").padEnd(maxTypeLength + 2, " ")
+        + " DB PB Total MVs lbs\n"
+    body.forEach(result => {
+        resultString += result.Name.padStart(maxNameLength," ") + " " 
+        + ("(" + result.Type + ")").padEnd(maxTypeLength+3," ")  
+        + result.DB.padStart(3,' ') + " " + result.PB.padStart(2,' ') + " " 
+        + result.Total.padStart(4,' ') + " " + result.MV.padStart(3,' ') + " " 
+        + result.Weight.padStart(4," ") + "\n"
     });
 
     resultString += "```";
@@ -122,17 +150,24 @@ function getStatsInfo(args, callback) {
         callback(statsHelpMessage);
     } else if (args[0] == 'eq') {
         args = args.splice(1);
+        
         var url='https://equipmentstats.azurewebsites.net/api/GetEqStats?name='+args.join('%20');
         console.log(url);
-        request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
+        request(url, {rejectUnauthorized: false, json: true }, (err, res, eqbody) => {
             if (err) { return console.log(err); }
-            if (body.length == 0)
-            {
-                callback('No results for ' + args.join(' '));
-                return;
-            }
 
-            callback(printEqResults(body));
+            var trinkurl='https://equipmentstats.azurewebsites.net/api/GetTrinkStats?name='+args.join('%20');
+            console.log(trinkurl);
+            request(trinkurl, {rejectUnauthorized: false, json: true }, (err, res, trinkbody) => {
+                if (err) { return console.log(err); }
+                if (trinkbody.length == 0 && eqbody.length == 0)
+                {
+                    callback('No results for ' + args.join(' '));
+                    return;
+                }
+
+                callback(printEqResults(eqbody) + printTrinkResults(trinkbody));
+            });
         });
     } else if (args[0] == 'class') {
         var url='https://equipmentstats.azurewebsites.net/api/GetStats?type='+args[1];
