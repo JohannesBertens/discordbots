@@ -114,7 +114,7 @@ function printTrinkResults (body) {
         resultString += result.Name.padStart(maxNameLength," ") + " " 
         + ("(" + result.Type + ")").padEnd(maxTypeLength+3," ")  
         + result.DB.padStart(3,' ') + " " + result.PB.padStart(2,' ') + " " 
-        + result.Total.padStart(4,' ') + " " + result.MV.padStart(3,' ') + " " 
+        + result.Total.padStart(4,' ') + " " + (result.MV ? result.MV.padStart(3,' ') : "".padStart(3, ' ')) + " " 
         + result.Weight.padStart(4," ") + "\n";
     });
 
