@@ -84,11 +84,11 @@ function printEqResults (body) {
     var resultString = "```";
     resultString += " EQUIPMENT -- ".padStart(maxNameLength + 2,"-")
         + "CLASS".padStart(maxTypeLength/2 + 2, " ").padEnd(maxTypeLength + 2, " ")
-        + " DB PB Total MVs lbs TAbs% EAbs%\n"
+        + " DB  PB Total MVs lbs TAbs% EAbs%\n"
     body.forEach(result => {
         resultString += result.Name.padStart(maxNameLength," ") + " " 
         + ("(" + result.Type + ")").padEnd(maxTypeLength+3," ")  
-        + result.DB.padStart(3,' ') + " " + result.PB.padStart(2,' ') + " " 
+        + result.DB.padStart(3,' ') + " " + result.PB.padStart(3,' ') + " " 
         + result.Total.padStart(4,' ') + " " + result.MV.padStart(3,' ') + " " 
         + result.Weight.padStart(4," ") + " " + result['True Abs %'].padStart(4," ") + " " + result['Est Abs %'].padStart(5," ") + "\n";
     });
