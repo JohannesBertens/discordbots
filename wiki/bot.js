@@ -70,6 +70,30 @@ function printResults (body) {
     return resultString;
 }
 
+function printEqResults (body) {
+    var maxNameLength = 0;
+    var maxTypeLength = 0;
+    body.forEach(result => {
+        maxNameLength = Math.max(result.Name.length, maxNameLength);
+        maxTypeLength = Math.max(result.Type.length, maxTypeLength);
+    });
+
+    var resultString = "```";
+    resultString += "".padStart(maxNameLength + 2," ")
+        + "CLASS".padStart(maxTypeLength/2 + 2, " ").padEnd(maxTypeLength + 2, " ")
+        + " DB PB Total MVs lbs TAbs% EAbs%\n"
+    body.forEach(result => {
+        resultString += result.Name.padStart(maxNameLength," ") + " " 
+        + ("(" + result.Type + ")").padEnd(maxTypeLength+3," ")  
+        + result.DB.padStart(3,' ') + " " + result.PB.padStart(2,' ') + " " 
+        + result.Total.padStart(4,' ') + " " + result.MV.padStart(3,' ') + " " 
+        + result.Weight.padStart(4," ") + " " + result['True Abs %'].padStart(4," ") + " " + result['Est Abs %'].padStart(5," ") + "\n"
+    });
+
+    resultString += "```";
+    return resultString;
+}
+
 function getWikiInfo(searchString, callback) {
     var url='https://wotmud.fandom.com/api/v1/Search/List?query='+searchString+'&limit=1';
     console.log(url);
@@ -97,7 +121,19 @@ function getStatsInfo(args, callback) {
     if (args[0] == 'help') {
         callback(statsHelpMessage);
     } else if (args[0] == 'eq') {
-        // SEARCH FOR EQ HERE!
+        args = args.splice(1);
+        var url='https://equipmentstats.azurewebsites.net/api/GetEqStats?name='+args.join('%20');
+        console.log(url);
+        request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
+            if (body.length == 0)
+            {
+                callback('No results for ' + args.join(' '));
+                return;
+            }
+
+            callback(printEqResults(body));
+        });
     } else if (args[0] == 'class') {
         var url='https://equipmentstats.azurewebsites.net/api/GetStats?type='+args[1];
         console.log(url);
