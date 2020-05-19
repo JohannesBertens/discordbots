@@ -2,6 +2,7 @@ var Discord = require('discord.io');
 var logger = require('winston');
 var auth = require('./auth.json');
 const request = require('request');
+var moment = require('moment'); // require
 
 const statsHelpMessage="```" + `
 Usage:
@@ -10,6 +11,15 @@ Usage:
 .stats eq <keywords>:      EQUIPMENT and TRINKS with the <keywords> in the name
 .stats eq class <keyword>: EQUIPMENT and TRINKS with the <keyword> in the name of the CLASS
 ` + "```";
+
+const auctionHelpMessage="```" + `
+Usage:
+.auction:                          Lists all running auctions and closed auctions less than 1 day old
+.auction bid <auction> <amount>:   Bid on <auction> the <amount> of gc
+.auction create <time> <item>:     Create an auction for <item> that will run <time> hours
+.auction remove <auction>:         Remove the <auction> if you are the owner
+` + "```";
+
 const angrealMessage="```" + `
 --- female angreal ---     lbs uses SPpu SPtotal
 a disc of moonstone            0.2   10   8     80
@@ -26,7 +36,7 @@ a many-faceted stone	       4.0 142    3    426
 a small stone dagger	       ???  30    5    150
 a small crystalline globe      0.5  10   10    100
 a short, thick rod             2.5  10    6     60
-a carved ivory pyramid         ???  15   12    180` + "```";
+a carved ivory pyramid         0.2  15   12    180` + "```";
 const pracMessage = 'http://ickmund.github.io/practrainer/';
 const eqMessage = 'https://docs.google.com/spreadsheets/d/1F7WvYpa45zZpJhqLeh747CgDtk0LJZg-LRJDXwRf-TU/edit#gid=0';
 
@@ -240,6 +250,60 @@ function getStatsInfo(args, callback) {
     };              
 }
 
+function printAuctions(body) {
+    var resultString = "```";
+    body.forEach(auction => {
+        let endTime = moment(auction.endTime);
+        resultString +=  "Auction "+ auction.id + " for " + auction.item + " expires " + endTime.fromNow() + " (" + endTime.toString() + ")\n"; 
+    });
+
+    return resultString + "```";
+}
+
+function getAuctionInfo(args, callerId, callback) {
+    if (args[0] == 'help') {
+        callback(auctionHelpMessage);
+    } else if (args[0] == 'create') {
+        if (args.length < 3) {
+            callback("```Need to supply <time> and <item> in the create command, see .auction help```");
+            return;
+        }
+
+        let timeToRun = Number(args[1]);
+        if (Number.isNaN(timeToRun)) {
+            callback("```Need to supply a number for <time>, see .auction help```");
+            return;
+        }
+
+        let item = (args.splice(2)).join(' '); // removed create and time
+        // Default: list
+        var url='https://wotmudauction.azurewebsites.net/api/CreateAuction?code=uJbW9iCt9p5a/vps16fR5freakBSWlKJybP0sgc1S8bHJ5fVmOBmTg==&seller=' + callerId + '&endtime=' + timeToRun + '&item='+ encodeURI(item);
+        request(url, {method: 'post', rejectUnauthorized: false, json: true }, (err, res, body) => {
+            if (err) { console.log(err); return; }
+            if (res.statusCode != 200){
+                callback("Something went wrong: " + res.statusMessage)
+            } else {
+                callback("<@"+ callerId + "> has created an auction for " + item + " that will run for " + timeToRun + " hours.");
+            }
+        });
+        return;     
+    } else {
+        // Default: list
+        var url='https://wotmudauction.azurewebsites.net/api/GetAuctions?code=maQinmRyoLdFHamUKnzYWoVHadxbaFZYa6dGiRbok514pDu22tqIlg==';
+        request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
+            console.log(body);
+            if (err) { console.log(err); return; }
+            if (body.length == 0)
+            {
+                callback('No running auctions.');
+                return;
+            }
+
+            callback(printAuctions(body));
+        });
+    }
+}
+
 bot.on('message', function (user, userID, channelID, message, evt) {
     // Our bot needs to know if it will execute a command
     // It will listen for messages that will start with `!`
@@ -269,6 +333,11 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 break;
             case 'stats':
                 getStatsInfo(args, (message) => {
+                    bot.sendMessage({to: channelID, message: message})
+                });
+                break;
+            case 'auction':
+                getAuctionInfo(args, userID, (message) => {
                     bot.sendMessage({to: channelID, message: message})
                 });
                 break;
