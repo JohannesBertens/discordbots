@@ -2,6 +2,7 @@ var Discord = require('discord.io');
 var logger = require('winston');
 var auth = require('./auth.json');
 const request = require('request');
+const got = require('got');
 var moment = require('moment'); // require
 
 const statsHelpMessage="```" + `
@@ -250,14 +251,67 @@ function getStatsInfo(args, callback) {
     };              
 }
 
-function printAuctions(body) {
+function getNameFromId(userID) {
+    return bot.users[userID].username;
+}
+
+async function getHighestBid(auctionId) {
+    var url='https://wotmudauction.azurewebsites.net/api/GetBids?code=HdIkgtOAOkvOaHUpJkRlTJeXS6dxc5CxxKay8/rOKaH7Y0/SXiEoHg==&auction=' + auctionId;
+    try {
+        const response = await got(url);
+        console.log(response.body);
+
+        var bids = JSON.parse(response.body);
+        if (bids.length == 0) {
+            return "no bids yet";
+        }
+        bids.sort((a, b) => {
+            return a.gold > b.gold;
+        });
+
+        var highestBid = bids[0];
+        return "highest bid: " + highestBid.gold + " by " + getNameFromId(highestBid.bidder);
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function printAuctions(body) {
     var resultString = "```";
-    body.forEach(auction => {
+
+    resultString += "Running auctions:\n";
+    for (const auction of body) {
         let endTime = moment(auction.endTime);
-        resultString +=  "Auction "+ auction.id + " for " + auction.item + " expires " + endTime.fromNow() + " (" + endTime.toString() + ")\n"; 
-    });
+        if (endTime.isAfter(Date.now())) {
+            let highestBid = await getHighestBid(auction.id);
+            resultString += " ("+ auction.id + ") by "+ getNameFromId(auction.seller) + " for " + auction.item + " expires " + endTime.fromNow() + ", " +  highestBid + "\n";
+        }
+    }
+
+    resultString += "\nFinished auctions:\n";
+    for (const auction of body) {
+        let endTime = moment(auction.endTime);
+        if (endTime.isBefore(Date.now())) {
+            let highestBid = await getHighestBid(auction.id);
+            resultString +=  " ("+ auction.id + ") by "+ getNameFromId(auction.seller) + " for " + auction.item + " closed " + endTime.fromNow() + ", " + highestBid + "\n";
+        }
+    }
 
     return resultString + "```";
+}
+
+function addBid(callerId, auction, amount, callback) {
+    var url='https://wotmudauction.azurewebsites.net/api/AddBid?code=b9qco0z0cLY0pgd/h7BhYk7g/FOwci5CItTDrrEUV7tr4vJ3H/xRFA==&bidder=' + callerId + '&auction=' + auction + '&gold='+ amount;
+    console.log(url);
+    request(url, {method: 'post', rejectUnauthorized: false, json: true }, (err, res, body) => {
+        if (err) { console.log(err); return; }
+        if (res.statusCode != 200){
+            callback("Something went wrong: " + res.body);
+        } else {
+            callback("Added bid of " + amount + "gc by <@" + callerId + "> for auction " + auction);
+        }
+    });
 }
 
 function getAuctionInfo(args, callerId, callback) {
@@ -276,22 +330,40 @@ function getAuctionInfo(args, callerId, callback) {
         }
 
         let item = (args.splice(2)).join(' '); // removed create and time
-        // Default: list
         var url='https://wotmudauction.azurewebsites.net/api/CreateAuction?code=uJbW9iCt9p5a/vps16fR5freakBSWlKJybP0sgc1S8bHJ5fVmOBmTg==&seller=' + callerId + '&endtime=' + timeToRun + '&item='+ encodeURI(item);
         request(url, {method: 'post', rejectUnauthorized: false, json: true }, (err, res, body) => {
             if (err) { console.log(err); return; }
             if (res.statusCode != 200){
-                callback("Something went wrong: " + res.statusMessage)
+                console.log(res);
+                callback("Something went wrong: " + res.body);
             } else {
-                callback("<@"+ callerId + "> has created an auction for " + item + " that will run for " + timeToRun + " hours.");
+                callback("<@"+ callerId + "> has created an auction for " + item + " that will run for " + timeToRun + " hours");
             }
         });
-        return;     
+        return;
+    } else if (args[0] == 'bid') {
+        if (args.length < 2) {
+            callback("```Need to supply <auction> and <amount> in the bid command, see .auction help```");
+            return;
+        }
+        
+        let auction = Number(args[1]);
+        if (Number.isNaN(auction)) {
+            callback("```Need to supply a number for <auction>, see .auction help```");
+            return;
+        }
+
+        let amount = Number(args[2]);
+        if (Number.isNaN(amount)) {
+            callback("```Need to supply an amount for <amount>, see .auction help```");
+            return;
+        }
+
+        addBid(callerId, auction, amount, callback);
     } else {
         // Default: list
         var url='https://wotmudauction.azurewebsites.net/api/GetAuctions?code=maQinmRyoLdFHamUKnzYWoVHadxbaFZYa6dGiRbok514pDu22tqIlg==';
-        request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
-            console.log(body);
+        request(url, {rejectUnauthorized: false, json: true },async (err, res, body) => {
             if (err) { console.log(err); return; }
             if (body.length == 0)
             {
@@ -299,7 +371,7 @@ function getAuctionInfo(args, callerId, callback) {
                 return;
             }
 
-            callback(printAuctions(body));
+            callback(await printAuctions(body));
         });
     }
 }
