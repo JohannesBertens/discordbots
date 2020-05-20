@@ -135,7 +135,6 @@ function printTrinkResults (body) {
 
 function getWikiInfo(searchString, callback) {
     var url='https://wotmud.fandom.com/api/v1/Search/List?query='+searchString+'&limit=1';
-    console.log(url);
     request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
         if (err) { callback(err); return console.log(err); }
         
@@ -184,7 +183,6 @@ function getStatsInfo(args, callback) {
             args = args.splice(1);
 
             var url='https://equipmentstats.azurewebsites.net/api/GetEqStats?type='+args.join('%20');
-            console.log(url);
             request(url, {rejectUnauthorized: false, json: true }, (err, res, eqbody) => {
                 if (err) { console.log(err); return; }
 
@@ -203,12 +201,10 @@ function getStatsInfo(args, callback) {
             });
         } else {
             var url='https://equipmentstats.azurewebsites.net/api/GetEqStats?name='+args.join('%20');
-            console.log(url);
             request(url, {rejectUnauthorized: false, json: true }, (err, res, eqbody) => {
                 if (err) { console.log(err); return; }
 
                 var trinkurl='https://equipmentstats.azurewebsites.net/api/GetTrinkStats?name='+args.join('%20');
-                console.log(trinkurl);
                 request(trinkurl, {rejectUnauthorized: false, json: true }, (err, res, trinkbody) => {
                     if (err) { console.log(err); return; }
                     if (trinkbody.length == 0 && eqbody.length == 0)
@@ -223,7 +219,6 @@ function getStatsInfo(args, callback) {
         }
     } else if (args[0] == 'class') {
         var url='https://equipmentstats.azurewebsites.net/api/GetStats?type='+args[1];
-        console.log(url);
         request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
             if (err) { console.log(err); return; }
             if (body.length == 0)
@@ -236,9 +231,7 @@ function getStatsInfo(args, callback) {
         }); 
     } else {
         var url='https://equipmentstats.azurewebsites.net/api/GetStats?name='+args.join('%20');
-        console.log(url);
         request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
-            //console.log(body);
             if (err) { console.log(err); return; }
             if (body.length == 0)
             {
@@ -259,7 +252,6 @@ async function getHighestBid(auctionId) {
     var url='https://wotmudauction.azurewebsites.net/api/GetBids?code=HdIkgtOAOkvOaHUpJkRlTJeXS6dxc5CxxKay8/rOKaH7Y0/SXiEoHg==&auction=' + auctionId;
     try {
         const response = await got(url);
-        console.log(response.body);
 
         var bids = JSON.parse(response.body);
         if (bids.length == 0) {
@@ -303,7 +295,6 @@ async function printAuctions(body) {
 
 function addBid(callerId, auction, amount, callback) {
     var url='https://wotmudauction.azurewebsites.net/api/AddBid?code=b9qco0z0cLY0pgd/h7BhYk7g/FOwci5CItTDrrEUV7tr4vJ3H/xRFA==&bidder=' + callerId + '&auction=' + auction + '&gold='+ amount;
-    console.log(url);
     request(url, {method: 'post', rejectUnauthorized: false, json: true }, (err, res, body) => {
         if (err) { console.log(err); return; }
         if (res.statusCode != 200){
@@ -334,7 +325,6 @@ function getAuctionInfo(args, callerId, callback) {
         request(url, {method: 'post', rejectUnauthorized: false, json: true }, (err, res, body) => {
             if (err) { console.log(err); return; }
             if (res.statusCode != 200){
-                console.log(res);
                 callback("Something went wrong: " + res.body);
             } else {
                 callback("<@"+ callerId + "> has created an auction for " + item + " that will run for " + timeToRun + " hours");
