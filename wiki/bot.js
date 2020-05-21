@@ -66,8 +66,7 @@ function printResults (body) {
         maxTypeLength = Math.max(result.Type.length, maxTypeLength);
     });
 
-    var resultString = "```";
-    resultString += "".padStart(maxNameLength + 2," ")
+    var resultString = "".padStart(maxNameLength + 2," ")
         + "CLASS".padStart(maxTypeLength/2 + 2, " ").padEnd(maxTypeLength + 2, " ")
         + " OB PB  lbs DMG\n"
     body.forEach(result => {
@@ -77,7 +76,6 @@ function printResults (body) {
         + result.Weight.padStart(4," ") + " " + result['Damage Roll'] + "\n"
     });
 
-    resultString += "```";
     return resultString;
 }
 
@@ -91,8 +89,7 @@ function printEqResults (body) {
         maxTypeLength = Math.max(result.Type.length, maxTypeLength);
     });
 
-    var resultString = "```";
-    resultString += " EQUIPMENT -- ".padStart(maxNameLength + 2,"-")
+    var resultString = " EQUIPMENT -- ".padStart(maxNameLength + 2,"-")
         + "CLASS".padStart(maxTypeLength/2 + 2, " ").padEnd(maxTypeLength + 2, " ")
         + " DB  PB Total MVs lbs TAbs% EAbs%\n"
     body.forEach(result => {
@@ -103,7 +100,6 @@ function printEqResults (body) {
         + result.Weight.padStart(4," ") + " " + result['True Abs %'].padStart(4," ") + " " + result['Est Abs %'].padStart(5," ") + "\n";
     });
 
-    resultString += "```";
     return resultString;
 }
 
@@ -117,8 +113,7 @@ function printTrinkResults (body) {
         maxTypeLength = Math.max(result.Type.length, maxTypeLength);
     });
 
-    var resultString = "```";
-    resultString += " TRINKS -- ".padStart(maxNameLength + 2,"-")
+    var resultString = " TRINKS -- ".padStart(maxNameLength + 2,"-")
         + "CLASS".padStart(maxTypeLength/2 + 2, " ").padEnd(maxTypeLength + 2, " ")
         + " DB PB Total MVs lbs\n"
     body.forEach(result => {
@@ -129,7 +124,6 @@ function printTrinkResults (body) {
         + result.Weight.padStart(4," ") + "\n";
     });
 
-    resultString += "```";
     return resultString;
 }
 
@@ -156,20 +150,26 @@ function getWikiInfo(searchString, callback) {
 }
 
 function postMessage(message, callback) {
+    console.log(message.length);
     if (message.length > 2000) // DRAMA!
     {
         var lines = message.split("\n");
+        var amountSent = 0;
+        var sendMessage = "";
+        for (var i = 0; i < lines.length; i++) {
+            if (sendMessage.length + lines[i].length > 2000)
+            {
+                setTimeout(function (msg){callback(msg)}, amountSent * 1000, "```"+sendMessage+"```");
+                amountSent++;
+                sendMessage = "";
+            }
 
-        var msg1 = (lines.slice(0, lines.length/2)).join("\n") + "```";
-        callback(msg1);
+            sendMessage += lines[i] + "\n";
+        }
 
-        var msg2 = "```" + (lines.slice(lines.length/2)).join("\n");
-        setTimeout(function (){
-            callback(msg2);
-          }, 1000); 
-        
+        setTimeout(function (msg){callback(msg)}, amountSent * 1000, "```"+sendMessage+"```");
     } else {
-        callback(message);
+        callback("```"+message+"```");
     }
 }
 
@@ -227,7 +227,7 @@ function getStatsInfo(args, callback) {
                 return;
             }
 
-            callback(printResults(body));                   
+            postMessage(printResults(body), callback);                   
         }); 
     } else {
         var url='https://equipmentstats.azurewebsites.net/api/GetStats?name='+args.join('%20');
@@ -239,7 +239,7 @@ function getStatsInfo(args, callback) {
                 return;
             }
 
-            callback(printResults(body));
+            postMessage(printResults(body), callback);
         });
     };              
 }
@@ -248,36 +248,14 @@ function getNameFromId(userID) {
     return bot.users[userID].username;
 }
 
-async function getHighestBid(auctionId) {
-    var url='https://wotmudauction.azurewebsites.net/api/GetBids?code=HdIkgtOAOkvOaHUpJkRlTJeXS6dxc5CxxKay8/rOKaH7Y0/SXiEoHg==&auction=' + auctionId;
-    try {
-        const response = await got(url);
-
-        var bids = JSON.parse(response.body);
-        if (bids.length == 0) {
-            return "no bids yet";
-        }
-        bids.sort((a, b) => {
-            return a.gold > b.gold;
-        });
-
-        var highestBid = bids[0];
-        return "highest bid: " + highestBid.gold + " by " + getNameFromId(highestBid.bidder);
-
-    } catch (error) {
-        console.log(error);
-    }
-}
 
 async function printAuctions(body) {
-    var resultString = "```";
-
-    resultString += "Running auctions:\n";
+    var resultString = "Running auctions:\n";
     for (const auction of body) {
         let endTime = moment(auction.endTime);
         if (endTime.isAfter(Date.now())) {
-            let highestBid = await getHighestBid(auction.id);
-            resultString += " ("+ auction.id + ") by "+ getNameFromId(auction.seller) + " for " + auction.item + " expires " + endTime.fromNow() + ", " +  highestBid + "\n";
+            resultString += " ("+ auction.id + ") by "+ getNameFromId(auction.seller) + " for " + auction.item + " expires " + endTime.fromNow() +
+             (auction.highestBid > 0 ? (", highest bid: " +  auction.highestBid + "gc by " + getNameFromId(auction.bidder)) : ", no bids yet.") + "\n";
         }
     }
 
@@ -285,12 +263,12 @@ async function printAuctions(body) {
     for (const auction of body) {
         let endTime = moment(auction.endTime);
         if (endTime.isBefore(Date.now())) {
-            let highestBid = await getHighestBid(auction.id);
-            resultString +=  " ("+ auction.id + ") by "+ getNameFromId(auction.seller) + " for " + auction.item + " closed " + endTime.fromNow() + ", " + highestBid + "\n";
+            resultString +=  " ("+ auction.id + ") by "+ getNameFromId(auction.seller) + " for " + auction.item + " closed " + endTime.fromNow() + 
+            (auction.highestBid > 0 ? (", highest bid: " +  auction.highestBid + "gc by " + getNameFromId(auction.bidder)) : ", unsold - nobody entered a bid.") + "\n";
         }
     }
 
-    return resultString + "```";
+    return resultString;
 }
 
 function addBid(callerId, auction, amount, callback) {
@@ -354,6 +332,7 @@ function getAuctionInfo(args, callerId, callback) {
         // Default: list
         var url='https://wotmudauction.azurewebsites.net/api/GetAuctions?code=maQinmRyoLdFHamUKnzYWoVHadxbaFZYa6dGiRbok514pDu22tqIlg==';
         request(url, {rejectUnauthorized: false, json: true },async (err, res, body) => {
+            //console.log(body);
             if (err) { console.log(err); return; }
             if (body.length == 0)
             {
@@ -361,7 +340,7 @@ function getAuctionInfo(args, callerId, callback) {
                 return;
             }
 
-            callback(await printAuctions(body));
+            postMessage(await printAuctions(body), callback);
         });
     }
 }
