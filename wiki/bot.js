@@ -298,7 +298,11 @@ function getAuctionInfo(args, callerId, callback) {
             return;
         }
 
-        let item = (args.splice(2)).join(' '); // removed create and time
+        let item = (args.splice(2)).join(' ').trim; // removed create and time
+        if (item.length > 45) {
+            item = item.slice(0, 42) + "...";
+        }
+
         var url='https://wotmudauction.azurewebsites.net/api/CreateAuction?code=uJbW9iCt9p5a/vps16fR5freakBSWlKJybP0sgc1S8bHJ5fVmOBmTg==&seller=' + callerId + '&endtime=' + timeToRun + '&item='+ encodeURI(item);
         request(url, {method: 'post', rejectUnauthorized: false, json: true }, (err, res, body) => {
             if (err) { console.log(err); return; }
