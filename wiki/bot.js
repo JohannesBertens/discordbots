@@ -255,16 +255,20 @@ async function printAuctions(body) {
         let endTime = moment(auction.endTime);
         if (endTime.isAfter(Date.now())) {
             resultString += " ("+ auction.id + ") by "+ getNameFromId(auction.seller) + " for " + auction.item + " expires " + endTime.fromNow() +
-             (auction.highestBid > 0 ? (", highest bid: " +  auction.highestBid + "gc by " + getNameFromId(auction.bidder)) : ", no bids yet.") + "\n";
+                            (auction.highestBid > 0 ? (", highest bid: " +  auction.highestBid + "gc by " + getNameFromId(auction.bidder)) : ", no bids yet.") + "\n";
         }
     }
 
     resultString += "\nFinished auctions:\n";
+    var count = 0;
     for (const auction of body) {
         let endTime = moment(auction.endTime);
         if (endTime.isBefore(Date.now())) {
-            resultString +=  " ("+ auction.id + ") by "+ getNameFromId(auction.seller) + " for " + auction.item + " closed " + endTime.fromNow() + 
-            (auction.highestBid > 0 ? (", highest bid: " +  auction.highestBid + "gc by " + getNameFromId(auction.bidder)) : ", unsold - nobody entered a bid.") + "\n";
+            if (count < 5) {
+                count++;
+                resultString +=  " ("+ auction.id + ") by "+ getNameFromId(auction.seller) + " for " + auction.item + " closed " + endTime.fromNow() + 
+                                (auction.highestBid > 0 ? (", highest bid: " +  auction.highestBid + "gc by " + getNameFromId(auction.bidder)) : ", unsold - nobody entered a bid.") + "\n";
+            }
         }
     }
 
