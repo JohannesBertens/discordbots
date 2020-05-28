@@ -302,7 +302,7 @@ function getAuctionInfo(args, callerId, callback) {
             return;
         }
 
-        let item = (args.splice(2)).join(' ').trim; // removed create and time
+        let item = (args.splice(2)).join(' ').trim(); // removed create and time
         if (item.length > 45) {
             item = item.slice(0, 42) + "...";
         }
