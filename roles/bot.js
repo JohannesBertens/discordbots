@@ -94,6 +94,26 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 });
 
                 break;
+            case 'sfw':
+                logger.info(message);
+                let noSpiceRole = Object.entries(bot.servers[currentServer].roles).find(r => r[1].name == "no spice");
+                bot.getMember({"serverID":currentServer,"userID":userID}, function(err, res) {
+                    if (err) {
+                        console.error(err);
+                    } else {
+                        if (res.roles.includes(noSpiceRole[0])) {
+                            bot.removeFromRole({"serverID":currentServer,"userID":userID,"roleID":noSpiceRole[0]},function(err,response) {
+                                if (err) console.error(err); /* Failed to remove role */
+                            });
+                        } else {
+                            bot.addToRole({"serverID":currentServer,"userID":userID,"roleID":noSpiceRole[0]},function(err,response) {
+                                if (err) console.error(err); /* Failed to apply role */
+                            });        
+                        }
+                    }
+                });
+
+                break;
             break;
             // Just add any case commands if you want to..
          }
