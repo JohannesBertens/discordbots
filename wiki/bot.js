@@ -182,11 +182,11 @@ function getStatsInfo(args, callback) {
         if (args[0] == 'class') {
             args = args.splice(1);
 
-            var url='https://equipmentstats.azurewebsites.net/api/GetEqStats?type='+args.join('%20');
+            var url='https://botwiki.azurewebsites.net/api/GetEqStats?type='+args.join('%20');
             request(url, {rejectUnauthorized: false, json: true }, (err, res, eqbody) => {
                 if (err) { console.log(err); return; }
 
-                var trinkurl='https://equipmentstats.azurewebsites.net/api/GetTrinkStats?type='+args.join('%20');
+                var trinkurl='https://botwiki.azurewebsites.net/api/GetTrinkStats?type='+args.join('%20');
                 console.log(trinkurl);
                 request(trinkurl, {rejectUnauthorized: false, json: true }, (err, res, trinkbody) => {
                     if (err) { console.log(err); return; }
@@ -200,11 +200,11 @@ function getStatsInfo(args, callback) {
                 });
             });
         } else {
-            var url='https://equipmentstats.azurewebsites.net/api/GetEqStats?name='+args.join('%20');
+            var url='https://botwiki.azurewebsites.net/api/GetEqStats?name='+args.join('%20');
             request(url, {rejectUnauthorized: false, json: true }, (err, res, eqbody) => {
                 if (err) { console.log(err); return; }
 
-                var trinkurl='https://equipmentstats.azurewebsites.net/api/GetTrinkStats?name='+args.join('%20');
+                var trinkurl='https://botwiki.azurewebsites.net/api/GetTrinkStats?name='+args.join('%20');
                 request(trinkurl, {rejectUnauthorized: false, json: true }, (err, res, trinkbody) => {
                     if (err) { console.log(err); return; }
                     if (trinkbody.length == 0 && eqbody.length == 0)
@@ -218,7 +218,7 @@ function getStatsInfo(args, callback) {
             });
         }
     } else if (args[0] == 'class') {
-        var url='https://equipmentstats.azurewebsites.net/api/GetStats?type='+args[1];
+        var url='https://botwiki.azurewebsites.net/api/GetStats?type='+args[1];
         request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
             if (err) { console.log(err); return; }
             if (body.length == 0)
@@ -230,7 +230,7 @@ function getStatsInfo(args, callback) {
             postMessage(printResults(body), callback);                   
         }); 
     } else {
-        var url='https://equipmentstats.azurewebsites.net/api/GetStats?name='+args.join('%20');
+        var url='https://botwiki.azurewebsites.net/api/GetStats?name='+args.join('%20');
         request(url, {rejectUnauthorized: false, json: true }, (err, res, body) => {
             if (err) { console.log(err); return; }
             if (body.length == 0)
