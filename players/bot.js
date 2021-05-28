@@ -1,4 +1,5 @@
-var Discord = require('discord.io');
+const Discord = require('discord.js');
+const client = new Discord.Client();
 var logger = require('winston');
 var auth = require('./auth.json');
 const request = require('request');
@@ -8,17 +9,13 @@ logger.add(new logger.transports.Console, {
     colorize: true
 });
 logger.level = 'debug';
-// Initialize Discord Bot
-var bot = new Discord.Client({
-   token: auth.token,
-   autorun: true
-});
-bot.on('ready', function (evt) {
+
+client.on('ready', function (evt) {
     logger.info('Connected');
-    logger.info('Logged in as: ');
-    logger.info(bot.username + ' - (' + bot.id + ')');
+    logger.info(`Logged in as ${client.user.tag}!`);
 });
-bot.on('message', function (user, userID, channelID, message, evt) {
+
+client.on('message', msg => {
     // Our bot needs to know if it will execute a command
     // It will listen for messages that will start with `!`
     if (message.substring(0, 1) == '.') {
@@ -29,21 +26,17 @@ bot.on('message', function (user, userID, channelID, message, evt) {
         switch(cmd) {
             // .ping
             case 'ping':
-                bot.sendMessage({
-                    to: channelID,
-                    message: 'Pong!'
-                });
+                msg.channel.send('Pong!');
                 break;
             case 'num':
                 request('https://writtenrealms.com:9000/api/v1/wot/who/?format=json', {rejectUnauthorized: false, json: true }, (err, res, body) => {
                     if (err) { return console.log(err); }
-                    bot.sendMessage({
-                        to: channelID,
-                        message: body.ls_count + " LS, " + body.ds_count + " DS online."
-                    })
+                    msg.channel.send(body.ls_count + " LS, " + body.ds_count + " DS online.");
                 });               
             break;
             // Just add any case commands if you want to..
          }
      }
 });
+
+client.login(auth.token)
