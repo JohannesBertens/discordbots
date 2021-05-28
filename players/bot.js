@@ -18,8 +18,8 @@ client.on('ready', function (evt) {
 client.on('message', msg => {
     // Our bot needs to know if it will execute a command
     // It will listen for messages that will start with `!`
-    if (message.substring(0, 1) == '.') {
-        var args = message.substring(1).split(' ');
+    if (msg.content.substring(0, 1) == '.') {
+        var args = msg.content.substring(1).split(' ');
         var cmd = args[0];
        
         args = args.splice(1);
