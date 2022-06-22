@@ -6,7 +6,7 @@
     "author": "Mantas",
     "dependencies": {
         "discord.js": "^12.5.3",
-        "got": "^11.1.4",
+        "got": "^11.8.5",
         "moment": "^2.25.3",
         "request": "^2.88.0",
         "winston": "^3.2.1"
