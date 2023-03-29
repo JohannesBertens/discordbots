@@ -1,0 +1,11 @@
+{
+  "name": "who-bot",
+  "version": "1.0.0",
+  "description": "Wotmud Who Bot",
+  "main": "bot.js",
+  "author": "Mantas",
+  "dependencies": {
+    "discord.js": "^14.8.0",
+    "winston": "^3.8.2"
+  }
+}
